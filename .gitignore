@@ -26,5 +26,4 @@ venv/
 # Logs
 *.log
 
-*.README_TEMPLATE.md
-*.README_TEMPLATE
+README_TEMPLATE.md
