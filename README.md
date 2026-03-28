@@ -1,4 +1,4 @@
-# DocuBot XXXXXXXX  yyyy  nnnn XXXXXXXXX
+# DocuBot
 
 DocuBot is a small documentation assistant that helps answer developer questions about a codebase.  
 It can operate in three different modes:
