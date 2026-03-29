@@ -1,4 +1,5 @@
 # DocuBot Model Card
+# > [Model Card](model_card.md) | [ReadMe](ReadMe.md) | 
 
 This model card reflects on the design, behavior, and limitations of DocuBot after implementing retrieval and testing all three system modes.
 
