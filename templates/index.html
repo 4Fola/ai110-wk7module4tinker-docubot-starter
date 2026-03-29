@@ -1,38 +1,95 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>AI110 WK07 | DocuBot</title>
+  <meta charset="UTF-8">
+  <title>AI110 WK07 | DocuBot</title>
+
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f9fafb;
+      margin: 40px;
+      color: #111827;
+    }
+
+    h1 {
+      margin-bottom: 0.2em;
+    }
+
+    p.subtitle {
+      color: #4b5563;
+      margin-bottom: 24px;
+    }
+
+    textarea {
+      width: 100%;
+      max-width: 820px;
+      padding: 12px;
+      font-size: 14px;
+    }
+
+    select, button {
+      margin-top: 12px;
+      padding: 8px 14px;
+      font-size: 14px;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .answer {
+      margin-top: 28px;
+      padding: 16px;
+      background: #ffffff;
+      border-left: 4px solid #2563eb;
+      white-space: pre-wrap;
+    }
+
+    .note {
+      margin-top: 32px;
+      font-size: 12px;
+      color: #6b7280;
+      max-width: 820px;
+    }
+  </style>
 </head>
+
 <body>
-    <h1>DocuBot</h1>
+  <h1>DocuBot | AI110 WK07</h1>
+  <p class="subtitle">
+    A retrieval‑augmented documentation assistant grounded strictly in local project files.
+  </p>
 
-    <form method="post">
-        <textarea
-        name="question"
-        rows="4"
-        cols="70"
-        placeholder="Ask a question about the documentation..."
-        >
-    </textarea>
-    <br>
-    <br>
-    
+  <form method="post">
+    <label><strong>Your question</strong></label><br>
+    <textarea
+      name="question"
+      rows="4"
+      placeholder="Ask a question about the documentation...e.g. Which endpoint returns all users?"
+      required
+    ></textarea><br>
+
+    <label><strong>Mode</strong></label><br>
     <select name="mode">
-        <option value="retrieval">Retrieval Only</option>
-        <option value="rag">RAG</option>
-    </select>
+      <option value="retrieval">Retrieval Only</option>
+      <option value="rag">RAG (Retrieval + Generation)</option>
+    </select><br>
 
-    <br>
-    <br>
-    <button type="submit">Ask</button>
+    <button type="submit">Ask DocuBot</button>
+  </form>
 
-    </form>
+  {% if answer %}
+    <div class="answer">
+      <strong>Answer</strong><br><br>
+      {{ answer }}
+    </div>
+  {% endif %}
 
-    {% if answer %}
-    <h3>Answer</h3>
-    <pre>{{ answer }}</pre>
-    {% endif %}
-
+  <div class="note">
+    NB: RAG responses are generated using only retrieved documentation snippets.
+    If the documentation does not support an answer, DocuBot will explicitly refuse.
+  </div>
 </body>
-
 </html>

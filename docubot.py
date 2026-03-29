@@ -19,49 +19,10 @@ class DocuBot:
         self.docs_folder = docs_folder
         self.llm_client = llm_client
         self.paragraphs = []
+        self.index = {}
 
         # Load documents into memory
         self.documents = self.load_documents()  # List of (filename, text)
-
-        # Build a retrieval index (implemented in Phase 1)
-        # WK07 Part 2: Build an inverted index over paragraph-level snippets
-        def build_index(self):
-            self.index = self.build_index(self.documents)
-            self.paragraphs = []
-
-            pid = 0
-            for doc_name, text in self.documents.items():
-                self.paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
-                for para in self.paragraphs:
-                    self.paragraphs.append(
-                        {"id": pid, "doc": doc_name, "text": para}
-                    )
-                    for word in para.lower().split():
-                        self.index[word].add(pid)
-                    pid += 1
-
-        # WK07 Part 2: Simple relevance scoring (query term frequency)
-        def score_paragraph(self, query: str, paragraph: str) -> int:
-            score = 0
-            for term in query.lower().split():
-                score += paragraph.lower().count(term)
-            return score
-        
-        # WK07 Part 3: Retrieve top-k relevant paragraphs with refusal safety
-        def retrieve(self, query: str, k: int = 3) -> list[str]:
-            scored =[]
-
-            for para in self.paragraphs:
-                score = self.score_paragraphs(query, para["text"])
-                if score > 0:
-                    scored.append((score, para["text"]))
-
-            if not scored:
-                # Guardrail: refusal when no meaningful evidence exists
-                return []
-            
-            scored.sort(key=lambda x: x[0], reverse = True)
-            return [text for _, text in scored [:k]]
         
 
     # -----------------------------------------------------------
@@ -102,9 +63,22 @@ class DocuBot:
         Keep this simple: split on whitespace, lowercase tokens,
         ignore punctuation if needed.
         """
-        index = {}
-        # TODO: implement simple indexing
-        return index
+       
+        """
+        Build a simple inverted index over paragraph-level snippets.
+        """
+        self.paragraphs = []
+        self.index = {}
+
+        pid = 0
+        for filename, text in self.documents:
+            paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
+            for para in paragraphs:
+                self.paragraphs.append((filename, para))
+                for word in para.lower().split():
+                    self.index.setdefault(word, set()).add(pid)
+                pid += 1
+
 
     # -----------------------------------------------------------
     # Scoring and Retrieval (Phase 1)
@@ -121,7 +95,11 @@ class DocuBot:
         - Return the count as the score
         """
         # TODO: implement scoring
-        return 0
+        score = 0
+        for term in query.lower().split():
+                score += text.lower().count(term)
+        return score
+
 
     def retrieve(self, query, top_k=3):
         """
@@ -132,7 +110,22 @@ class DocuBot:
         """
         results = []
         # TODO: implement retrieval logic
-        return results[:top_k]
+        # return results[:top_k]
+        
+        scored = []
+
+        for filename, para in self.paragraphs:
+            score = self.score_document(query, para)
+            if score > 0:
+                scored.append((score, filename, para))
+
+        if not scored:
+            # Guardrail — refuse when no evidence
+            return []
+
+        scored.sort(key=lambda x: x[0], reverse=True)
+        return [(fn, para) for _, fn, para in scored[:top_k]]
+
 
     # -----------------------------------------------------------
     # Answering Modes
