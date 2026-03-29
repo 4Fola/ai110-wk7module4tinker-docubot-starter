@@ -25,6 +25,23 @@ GEMINI_MODEL_NAME = "gemini-2.5-flash"
 MAX_RETRIES = 3
 INITIAL_RETRY_DELAY = 1  # seconds
 
+# -----------------------------------------------------------
+# LLM wrapper enforcing retrieval-grounded generation
+# -----------------------------------------------------------
+
+class LLMClient:
+    def generate(self, context: list[str], question: str) -> str:
+    # WK07 Part 4: RAG — model must use ONLY retrieved context
+        if not context:
+            return "I do not know based on the provided documentation."
+            
+        joined_context = "\n\n".join(context)
+
+        # Placeholder response format (Gemini-ready design)
+        return (
+            "Based on the documentation:\n\n"
+            f"{joined_context}"
+        )
 
 class GeminiClient:
     """
@@ -104,23 +121,7 @@ class GeminiClient:
         # If we exhausted retries or hit an error, return error message
         return f"[Error: Unable to get response from LLM. {last_error}]"
     
-    # -----------------------------------------------------------
-    # LLM wrapper enforcing retrieval-grounded generation
-    # -----------------------------------------------------------
 
-    class LLMClient:
-        def generate(self, context: list[str], question: str) -> str:
-            # WK07 Part 4: RAG — model must use ONLY retrieved context
-            if not context:
-                return "I do not know based on the provided documentation."
-            
-            joined_context = "\n\n".join(context)
-
-            # Placeholder response format (Gemini-ready design)
-            return (
-                "Based on the documentation:\n\n"
-                f"{joined_context}"
-            )
 
     # -----------------------------------------------------------
     # Phase 0: naive generation over full docs

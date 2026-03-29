@@ -1,160 +1,129 @@
 # DocuBot Model Card
 
-This model card is a short reflection on your DocuBot system. Fill it out after you have implemented retrieval and experimented with all three modes:
+This model card reflects on the design, behavior, and limitations of DocuBot after implementing retrieval and testing all three system modes.
 
 1. Naive LLM over full docs  
 2. Retrieval only  
 3. RAG (retrieval plus LLM)
-
-Use clear, honest descriptions. It is fine if your system is imperfect.
 
 ---
 
 ## 1. System Overview
 
 **What is DocuBot trying to do?**  
-Describe the overall goal in 2 to 3 sentences.
-
-> 1. Project Intent
-We are building DocuBot, a lightweight Retrieval-Augmented Generation (RAG) system that:
-
-Reads local documentation files
-Retrieves relevant evidence
-Grounds answers in that evidence
-Refuses to answer when evidence is insufficient
-
-This is not about sophistication for its own sake—it’s about the following:
-
-Reliability
-Logical correctness
-Guardrails
-Professional engineering practices
+DocuBot is a lightweight documentation assistant designed to help developers
+answer questions using only the information available in a local documentation
+folder. Its goal is to demonstrate how retrieval improves reliability compared
+to naive language model generation.
 
 **What inputs does DocuBot take?**  
-For example: user question, docs in folder, environment variables.
+DocuBot takes the following inputs:
+- A user question
+- Documentation files stored in the `docs/` folder (`.txt` and `.md`)
+- An optional `GEMINI_API_KEY` environment variable for LLM features
 
-> _Your answer here._
-
-**What outputs does DocuBot produce?**
-
-> _Your answer here._
+**What outputs does DocuBot produce?**  
+DocuBot outputs:
+- Retrieved documentation snippets (retrieval-only mode)
+- A grounded, LLM-generated answer (RAG mode)
+- An explicit refusal (“I do not know”) when documentation does not support an answer
 
 ---
 
 ## 2. Retrieval Design
 
 **How does your retrieval system work?**  
-Describe your choices for indexing and scoring.
-
-- How do you turn documents into an index?
-- How do you score relevance for a query?
-- How do you choose top snippets?
-
-> _Your answer here._
+The retrieval system:
+- Splits each document into paragraph-level snippets
+- Builds a simple inverted index over lowercase words
+- Scores each paragraph by counting how many query terms appear
+- Sorts paragraphs by score and returns the top-k matches
 
 **What tradeoffs did you make?**  
-For example: speed vs precision, simplicity vs accuracy.
-
-> _Your answer here._
+- Chose simplicity and transparency over sophisticated ranking
+- Used keyword matching instead of embeddings to keep behavior explainable
+- Accepted lower recall in exchange for clearer refusal behavior
 
 ---
 
 ## 3. Use of the LLM (Gemini)
 
 **When does DocuBot call the LLM and when does it not?**  
-Briefly describe how each mode behaves.
 
-- Naive LLM mode:
-- Retrieval only mode:
-- RAG mode:
-
-> _Your answer here._
+- **Naive LLM mode:** Sends the full documentation corpus to the LLM with no retrieval
+- **Retrieval-only mode:** Never calls the LLM; returns raw snippets only
+- **RAG mode:** Retrieves relevant snippets first, then calls the LLM using only those snippets
 
 **What instructions do you give the LLM to keep it grounded?**  
-Summarize the rules from your prompt. For example: only use snippets, say "I do not know" when needed, cite files.
-
-> _Your answer here._
+The LLM is explicitly instructed to:
+- Use only the retrieved snippets
+- Refuse to guess if the snippets are insufficient
+- Avoid inventing endpoints, functions, or configuration values
+- Say “I do not know based on the docs I have” when appropriate
 
 ---
 
 ## 4. Experiments and Comparisons
 
-Run the **same set of queries** in all three modes. Fill in the table with short notes.
+| Query | Naive LLM | Retrieval Only | RAG | Notes |
+|-----|-----------|----------------|-----|------|
+| Where is the auth token generated? | Sounded confident but vague | Returned correct snippet | Clear and grounded | RAG balanced clarity and evidence |
+| How do I connect to the database? | Mixed details incorrectly | Accurate but long | Accurate and readable | Retrieval prevented guessing |
+| Which endpoint lists all users? | Confident but unsupported | Correct snippet | Correct summary | Naive mode risks hallucination |
+| How does a client refresh an access token? | Looked plausible | No result | Refused safely | Correct refusal behavior |
 
-You can reuse or adapt the queries from `dataset.py`.
-
-| Query | Naive LLM: helpful or harmful? | Retrieval only: helpful or harmful? | RAG: helpful or harmful? | Notes |
-|------|---------------------------------|--------------------------------------|---------------------------|-------|
-| Example: Where is the auth token generated? | | | | |
-| Example: How do I connect to the database? | | | | |
-| Example: Which endpoint lists all users? | | | | |
-| Example: How does a client refresh an access token? | | | | |
-
-**What patterns did you notice?**  
-
-- When does naive LLM look impressive but untrustworthy?  
-- When is retrieval only clearly better?  
-- When is RAG clearly better than both?
-
-> _Your answer here._
+**What patterns did you notice?**
+- Naive LLM often sounds impressive but ungrounded
+- Retrieval-only is accurate but harder to interpret
+- RAG provides the best balance when documentation exists
+- Refusal is safer than confident guessing
 
 ---
 
 ## 5. Failure Cases and Guardrails
 
-**Describe at least two concrete failure cases you observed.**  
-For each one, say:
+**Failure case 1**  
+- Question: “How do I deploy this service to AWS?”
+- System behavior: Retrieval and RAG refused
+- Correct behavior: Refusal (no deployment info exists)
 
-- What was the question?  
-- What did the system do?  
-- What should have happened instead?
+**Failure case 2**  
+- Question: Vague query using synonyms not in docs
+- System behavior: No retrieval results
+- Correct behavior: Explicit refusal instead of guessing
 
-> _Failure case 1 here._
+**When should DocuBot say “I do not know based on the docs I have”?**
+- When no relevant snippets match the query
+- When retrieved snippets are insufficient to answer confidently
 
-> _Failure case 2 here._
-
-**When should DocuBot say “I do not know based on the docs I have”?**  
-Give at least two specific situations.
-
-> _Your answer here._
-
-**What guardrails did you implement?**  
-Examples: refusal rules, thresholds, limits on snippets, safe defaults.
-
-> _Your answer here._
+**What guardrails did you implement?**
+- Refusal when retrieval returns no results
+- Hard limit on number of snippets passed to the LLM
+- Prompt rules preventing unsupported claims
 
 ---
 
 ## 6. Limitations and Future Improvements
 
-**Current limitations**  
-List at least three limitations of your DocuBot system.
+**Current limitations**
+1. Retrieval depends on exact keyword overlap
+2. No semantic understanding or synonyms
+3. No ranking beyond simple term counts
 
-1. _Limitation 1_
-2. _Limitation 2_
-3. _Limitation 3_
-
-**Future improvements**  
-List two or three changes that would most improve reliability or usefulness.
-
-1. _Improvement 1_
-2. _Improvement 2_
-3. _Improvement 3_
+**Future improvements**
+1. Add semantic embeddings for retrieval
+2. Improve snippet chunking strategy
+3. Add confidence indicators in responses
 
 ---
 
 ## 7. Responsible Use
 
-**Where could this system cause real world harm if used carelessly?**  
-Think about wrong answers, missing information, or over trusting the LLM.
+**Where could this system cause real-world harm if used carelessly?**  
+If users overtrust naive LLM mode, they may act on incorrect or invented
+information. Missing or outdated documentation can also lead to false assumptions.
 
-> _Your answer here._
-
-**What instructions would you give real developers who want to use DocuBot safely?**  
-Write 2 to 4 short bullet points.
-
-- _Guideline 1_
-- _Guideline 2_
-- _Guideline 3 (optional)_
-
----
+**Instructions for safe use**
+- Do not trust naive LLM outputs without verification
+- Treat “I do not know” responses as safety features, not failures
+- Always verify answers against source documentation when making decisions

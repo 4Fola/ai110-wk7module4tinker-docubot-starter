@@ -48,7 +48,7 @@ class DocuBot:
     # Index Construction (Phase 1)
     # -----------------------------------------------------------
 
-    def build_index(self, documents):
+    def build_index(self):
         """
         TODO (Phase 1):
         Build a tiny inverted index mapping lowercase words to the documents
