@@ -10,10 +10,17 @@ Supports three modes:
 from dotenv import load_dotenv
 load_dotenv()
 
+from pathlib import Path
 from docubot import DocuBot
+from llm_client import LLMClient
 from llm_client import GeminiClient
 from dataset import SAMPLE_QUERIES
 
+def load_documents():
+    docs = {}
+    for path in Path("docs").glob("*.txt"):
+        docs[path.name] = path.read_text(encoding="utf-8")
+    return docs
 
 def try_create_llm_client():
     """
@@ -136,11 +143,15 @@ def run_rag_mode(bot, has_llm):
 
 
 def main():
+    documents = load_documents()
+   
     print("DocuBot Tinker Activity")
     print("=======================\n")
 
     llm_client, has_llm = try_create_llm_client()
     bot = DocuBot(llm_client=llm_client)
+    bot.build_index()
+    llm = LLMClient()
 
     while True:
         choice = choose_mode(has_llm)

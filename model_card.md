@@ -15,7 +15,20 @@ Use clear, honest descriptions. It is fine if your system is imperfect.
 **What is DocuBot trying to do?**  
 Describe the overall goal in 2 to 3 sentences.
 
-> _Your answer here._
+> 1. Project Intent
+We are building DocuBot, a lightweight Retrieval-Augmented Generation (RAG) system that:
+
+Reads local documentation files
+Retrieves relevant evidence
+Grounds answers in that evidence
+Refuses to answer when evidence is insufficient
+
+This is not about sophistication for its own sake—it’s about the following:
+
+Reliability
+Logical correctness
+Guardrails
+Professional engineering practices
 
 **What inputs does DocuBot take?**  
 For example: user question, docs in folder, environment variables.

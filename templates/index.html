@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI110 WK07 | DocuBot</title>
+</head>
+<body>
+    <h1>DocuBot</h1>
+
+    <form method="post">
+        <textarea
+        name="question"
+        rows="4"
+        cols="70"
+        placeholder="Ask a question about the documentation..."
+        >
+    </textarea>
+    <br>
+    <br>
+    
+    <select name="mode">
+        <option value="retrieval">Retrieval Only</option>
+        <option value="rag">RAG</option>
+    </select>
+
+    <br>
+    <br>
+    <button type="submit">Ask</button>
+
+    </form>
+
+    {% if answer %}
+    <h3>Answer</h3>
+    <pre>{{ answer }}</pre>
+    {% endif %}
+
+</body>
+
+</html>

@@ -18,12 +18,51 @@ class DocuBot:
         """
         self.docs_folder = docs_folder
         self.llm_client = llm_client
+        self.paragraphs = []
 
         # Load documents into memory
         self.documents = self.load_documents()  # List of (filename, text)
 
         # Build a retrieval index (implemented in Phase 1)
-        self.index = self.build_index(self.documents)
+        # WK07 Part 2: Build an inverted index over paragraph-level snippets
+        def build_index(self):
+            self.index = self.build_index(self.documents)
+            self.paragraphs = []
+
+            pid = 0
+            for doc_name, text in self.documents.items():
+                self.paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
+                for para in self.paragraphs:
+                    self.paragraphs.append(
+                        {"id": pid, "doc": doc_name, "text": para}
+                    )
+                    for word in para.lower().split():
+                        self.index[word].add(pid)
+                    pid += 1
+
+        # WK07 Part 2: Simple relevance scoring (query term frequency)
+        def score_paragraph(self, query: str, paragraph: str) -> int:
+            score = 0
+            for term in query.lower().split():
+                score += paragraph.lower().count(term)
+            return score
+        
+        # WK07 Part 3: Retrieve top-k relevant paragraphs with refusal safety
+        def retrieve(self, query: str, k: int = 3) -> list[str]:
+            scored =[]
+
+            for para in self.paragraphs:
+                score = self.score_paragraphs(query, para["text"])
+                if score > 0:
+                    scored.append((score, para["text"]))
+
+            if not scored:
+                # Guardrail: refusal when no meaningful evidence exists
+                return []
+            
+            scored.sort(key=lambda x: x[0], reverse = True)
+            return [text for _, text in scored [:k]]
+        
 
     # -----------------------------------------------------------
     # Document Loading
