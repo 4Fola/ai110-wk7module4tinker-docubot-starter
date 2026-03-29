@@ -85,9 +85,12 @@ def run_naive_llm_mode(bot, has_llm):
     for query in queries:
         print("=" * 60)
         print(f"Question: {query}\n")
-        answer = bot.llm_client.naive_answer_over_full_docs(query, all_text)
-        print("Answer:")
-        print(answer)
+        try:
+            answer = bot.llm_client.naive_answer_over_full_docs(query, all_text)
+            print("Answer:")
+            print(answer)
+        except Exception as e:
+            print(f"Error getting answer: {e}")
         print()
 
 
@@ -123,9 +126,12 @@ def run_rag_mode(bot, has_llm):
     for query in queries:
         print("=" * 60)
         print(f"Question: {query}\n")
-        answer = bot.answer_rag(query)
-        print("Answer:")
-        print(answer)
+        try:
+            answer = bot.answer_rag(query)
+            print("Answer:")
+            print(answer)
+        except Exception as e:
+            print(f"Error getting answer: {e}")
         print()
 
 

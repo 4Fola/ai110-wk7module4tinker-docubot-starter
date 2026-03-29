@@ -14,10 +14,16 @@ Experiment with:
 
 import os
 import google.generativeai as genai
+from google.api_core import exceptions
+import time
 
 # Central place to update the model name if needed.
 # You can swap this for a different Gemini model in the future.
 GEMINI_MODEL_NAME = "gemini-2.5-flash"
+
+# Retry configuration
+MAX_RETRIES = 3
+INITIAL_RETRY_DELAY = 1  # seconds
 
 
 class GeminiClient:
@@ -42,6 +48,62 @@ class GeminiClient:
         genai.configure(api_key=api_key)
         self.model = genai.GenerativeModel(GEMINI_MODEL_NAME)
 
+    def _call_api_with_retry(self, prompt):
+        """
+        Call the Gemini API with retry logic and error handling.
+        
+        Handles:
+        - Rate limiting (ResourceExhausted)
+        - Transient errors with exponential backoff
+        - Other API errors gracefully
+        """
+        last_error = None
+        
+        for attempt in range(MAX_RETRIES):
+            try:
+                response = self.model.generate_content(prompt)
+                return response.text or ""
+            except exceptions.ResourceExhausted as e:
+                # Out of quota - don't retry immediately, give clear feedback
+                error_msg = (
+                    f"API quota exceeded (attempt {attempt + 1}/{MAX_RETRIES}). "
+                    f"Please check your plan and billing at https://ai.google.dev/billing/quota"
+                )
+                last_error = error_msg
+                print(f"\n⚠️  {error_msg}")
+                
+                if attempt < MAX_RETRIES - 1:
+                    delay = INITIAL_RETRY_DELAY * (2 ** attempt)  # Exponential backoff
+                    print(f"   Retrying in {delay} seconds...")
+                    time.sleep(delay)
+                else:
+                    break
+            except (exceptions.DeadlineExceeded, exceptions.ServiceUnavailable) as e:
+                # Transient errors - retry with exponential backoff
+                last_error = str(e)
+                print(f"\n⚠️  API temporarily unavailable (attempt {attempt + 1}/{MAX_RETRIES}). Retrying...")
+                
+                if attempt < MAX_RETRIES - 1:
+                    delay = INITIAL_RETRY_DELAY * (2 ** attempt)
+                    time.sleep(delay)
+                else:
+                    break
+            except exceptions.GoogleAPIError as e:
+                # Other API errors
+                error_msg = f"API Error: {str(e)}"
+                last_error = error_msg
+                print(f"\n❌ {error_msg}")
+                break
+            except Exception as e:
+                # Unexpected errors
+                error_msg = f"Unexpected error: {str(e)}"
+                last_error = error_msg
+                print(f"\n❌ {error_msg}")
+                break
+        
+        # If we exhausted retries or hit an error, return error message
+        return f"[Error: Unable to get response from LLM. {last_error}]"
+
     # -----------------------------------------------------------
     # Phase 0: naive generation over full docs
     # -----------------------------------------------------------
@@ -52,8 +114,7 @@ class GeminiClient:
     You are a documentation assistant. 
     Answer this developer question: {query}
     """
-        response = self.model.generate_content(prompt)
-        return (response.text or "").strip()
+        return self._call_api_with_retry(prompt)
 
     # -----------------------------------------------------------
     # Phase 2: RAG style generation over retrieved snippets
@@ -107,5 +168,4 @@ Rules:
 - When you do answer, briefly mention which files you relied on.
 """
 
-        response = self.model.generate_content(prompt)
-        return (response.text or "").strip()
+        return self._call_api_with_retry(prompt).strip()
