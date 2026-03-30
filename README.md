@@ -16,6 +16,49 @@ It can operate in three different modes:
 The docs folder contains realistic developer documents (API reference, authentication notes, database notes), but these files are **just text**. They support retrieval experiments and do not require students to set up any backend systems.
 
 ---
+## What’s happening conceptually in CLI
+- The model sees everything
+- It is allowed to guess
+- It answers even when the docs don’t clearly contain the answer
+
+<img src="Part01-Demo.gif" alt="Part01-Demo">
+
+- ✅ This is intentionally unsafe
+- ✅ The CodePath assignment expects this behavior
+- ✅ This demonstrates hallucination risk
+
+<img src="Part02-Demo.gif" alt="Part02-Demo">
+
+✅ CLI — Retrieval & RAG
+In CLI Mode 2 and 3:
+- Retrieval only → snippets must match query
+- RAG → snippets MUST exist, or it refuses
+Therefore, if the docs don’t actually contain strong keyword matches, we get: I do not know based on these docs.
+---
+✅ Web UI:
+Does NOT run naive mode
+Only exposes:
+- Retrieval only
+- RAG
+
+So when you ask a question that is/are:
+
+- Is vague
+- Uses synonyms not in docs
+- Isn’t well supported by keywords
+
+The system correctly refuses with:
+- "I do not know"
+- "I do not know based on the provided documentation."
+
+<img src="RAG&Retrieval-Demo.gif" alt="RAG&Retrieval-Demo">
+
+- ✅ These behaviours are not a bug
+- ✅ That is our guardrail working
+
+### NB: This distinctions are actually important when you notice how naive mode answers confidently, while retrieval and RAG refuse when evidence is missing. This contrast demonstrates why retrieval grounding is necessary. Which is what this Tinker activity is trying to teach.
+---
+
 
 ## Setup
 

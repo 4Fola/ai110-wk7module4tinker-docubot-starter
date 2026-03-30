@@ -1,7 +1,7 @@
 # DocuBot Model Card
 # 👉 [Model Card](model_card.md) | [ReadMe](ReadMe.md) | 
 
-This model card reflects on the design, behavior, and limitations of DocuBot after implementing retrieval and testing all three system modes.
+This model card reflects on the design, behaviour, and limitations of DocuBot after implementing retrieval and testing all three system modes.
 
 1. Naive LLM over full docs  
 2. Retrieval only  
