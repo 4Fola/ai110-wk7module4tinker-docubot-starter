@@ -20,20 +20,20 @@ The docs folder contains realistic developer documents (API reference, authentic
 - The model sees everything
 - It is allowed to guess
 - It answers even when the docs don’t clearly contain the answer
-
-<img src="Part01-Demo.gif" alt="Part01-Demo">
-
 - ✅ This is intentionally unsafe
 - ✅ The CodePath assignment expects this behavior
 - ✅ This demonstrates hallucination risk
 
-<img src="Part02-Demo.gif" alt="Part02-Demo">
+<img src="Part01-Demo.gif" alt="Part01-Demo">
 
 ✅ CLI — Retrieval & RAG
 In CLI Mode 2 and 3:
 - Retrieval only → snippets must match query
 - RAG → snippets MUST exist, or it refuses
 Therefore, if the docs don’t actually contain strong keyword matches, we get: I do not know based on these docs.
+
+<img src="Part02-Demo.gif" alt="Part02-Demo">
+
 ---
 ✅ Web UI:
 Does NOT run naive mode
