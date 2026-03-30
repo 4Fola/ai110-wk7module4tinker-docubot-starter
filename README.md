@@ -1,5 +1,5 @@
 # DocuBot
-# 👉 [ReadMe](ReadMe.md) | [Model Card](model_card.md) |
+# 👉 [ReadMe](README.md) | [Model Card](model_card.md) |
 
 DocuBot is a small documentation assistant that helps answer developer questions about a codebase.  
 It can operate in three different modes:
